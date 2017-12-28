@@ -1,0 +1,4 @@
+pycurl
+ffmpeg in PATH
+urllib
+js2py
