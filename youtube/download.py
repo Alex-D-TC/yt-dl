@@ -153,7 +153,7 @@ def _extract_decryptor(data):
 
     jsplayer_id = files.strip_invalid_chars(_get_jsplayer_url(data).replace("/", "-"))
 
-    js_cache_root = "./serv_cache/jsplayer"
+    js_cache_root = "./res/serv_cache/jsplayer"
     js_path = files.get_from_cache(jsplayer_id, js_cache_root)
 
     if len(js_path) != 0:

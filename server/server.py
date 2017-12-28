@@ -18,7 +18,7 @@ class RequestHandler(server.SimpleHTTPRequestHandler):
         print(qs_data)
 
         if "v" in qs_data:
-            cache_root = os.path.abspath("serv_cache/vid").replace("\\", "/")
+            cache_root = os.path.abspath("res/serv_cache/vid").replace("\\", "/")
             cache_path = cache_root + "/{}".format(qs_data["v"])
 
             try:
