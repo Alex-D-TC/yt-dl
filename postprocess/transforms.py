@@ -21,6 +21,6 @@ def convert_file_to_mp3(file_path, extra_meta, result_path, result_filename=None
 
     # ffmpeg -i "input.extension"
     #   -metadata title="title" -metadata author="artist" -metadata album="album" -codec:a libmp3lame "output.mp3"
-    subprocess.call("ffmpeg " + " ".join(args))
+    subprocess.call("ffmpeg " + " ".join(args), shell=True)
 
     return "{}/{}.mp3".format(result_path, result_filename)
