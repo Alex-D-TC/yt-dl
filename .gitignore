@@ -2,8 +2,9 @@
 # Created by https://www.gitignore.io/api/python,intellij,intellij+iml
 
 ### CUSTOM ###
-/res/meta_html/meta_?*
-/res/meta_html/meta_?*
+stash
+res/meta_html/meta_?*
+res/meta_html/meta_?*
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
