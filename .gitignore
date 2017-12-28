@@ -5,6 +5,11 @@
 stash
 res/meta_html/meta_?*
 res/meta_url/meta_?*
+serv_cache/jsplayer/*
+serv_cache/vid/*
+
+!serv_cache/jsplayer/__init__.py
+!serv_cache/vid/__init__.py
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
