@@ -38,9 +38,20 @@ def _extract_metadata(html):
 
     # get video title
     title_loc_pat = "\"title\":\""
-    found_vid_title_start = string.boyer_moore_horspool(html, title_loc_pat, 0, 1)[0] + len(title_loc_pat)
+    found_matches = string.boyer_moore_horspool(html, title_loc_pat, start_idx=0, max_match=1)
+    found_vid_title_start = found_matches[0] + len(title_loc_pat)
     found_vid_title_end = found_vid_title_start
-    while html[found_vid_title_end] != "\"":
+
+    escaped = False
+
+    while escaped or html[found_vid_title_end] != "\"":
+
+        if escaped:
+            escaped = False
+        else:
+            if html[found_vid_title_end] == "\\":
+                escaped = True
+
         found_vid_title_end += 1
 
     extra_meta["title"] = html[found_vid_title_start:found_vid_title_end]
@@ -149,20 +160,7 @@ def _get_jsplayer_url(data):
     return "https://www.youtube.com{0}".format(data[found_start[0]+5:found_end[0]])
 
 
-def _extract_decryptor(data):
-
-    jsplayer_id = files.strip_invalid_chars(_get_jsplayer_url(data).replace("/", "-"))
-
-    js_cache_root = "./res/serv_cache/jsplayer"
-    js_path = files.get_from_cache(jsplayer_id, js_cache_root)
-
-    if len(js_path) != 0:
-        data = files.read_file(js_path)
-        func_id = data[0][:-1]
-        js_code = "".join(data[1:])
-        return lambda x: js2py.eval_js(js_code + "{}(\"{}\")".format(func_id, x))
-
-    data_js = files.download_web_content(_get_jsplayer_url(data))
+def _extract_decryptor_from_js(data_js):
 
     sig_pat = ".set(\"signature\","
     sig_locations = string.boyer_moore_horspool(data_js, sig_pat)
@@ -178,8 +176,26 @@ def _extract_decryptor(data):
             func_name_end = string.boyer_moore_horspool(data_js, "(", s_loc, 1)
             func_name = data_js[s_loc:func_name_end[0]]
 
-    # return decrypter
-    code = _relevant_code_of_identifier(func_name, data_js)
+    # return decrypter and root function name
+    return func_name, _relevant_code_of_identifier(func_name, data_js)
+
+
+def _extract_decryptor(data):
+
+    jsplayer_id = files.strip_invalid_chars(_get_jsplayer_url(data).replace("/", "-"))
+
+    js_cache_root = "./res/serv_cache/jsplayer"
+    js_path = files.get_from_cache(jsplayer_id, js_cache_root)
+
+    if len(js_path) != 0:
+        data = files.read_file(js_path)
+        func_id = data[0][:-1]
+        js_code = "".join(data[1:])
+        return lambda x: js2py.eval_js(js_code + "{}(\"{}\")".format(func_id, x))
+
+    data_js = files.download_web_content(_get_jsplayer_url(data))
+
+    func_name, code = _extract_decryptor_from_js(data_js)
 
     # save code
     files.save_file("{}\n{}".format(func_name, code), js_cache_root + "/{}/base.js".format(jsplayer_id))
@@ -214,7 +230,7 @@ def _get_code_blocks_for_func(func_root, in_code):
     obj_id = in_code[start_idx:end_idx]
 
     # get the code defining the object
-    found = re.search(r';?\s*%s=' % obj_id, in_code)
+    found = re.search(r';?[^A-Za-z0-9_]\s*%s=' % obj_id, in_code)
     start_idx = found.span()[0]
     while not in_code[start_idx].isalpha():
         start_idx += 1
